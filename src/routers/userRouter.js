@@ -40,6 +40,17 @@ router.get('/users/:username', (req,res) => {
     })
 })
 
+// check email availability
+router.get('/users/:email', (req,res) => {
+    const email = req.params 
+    const sql = `SELECT * FROM users WHERE username = '${email}'`
+
+    conn.query(sql, (err,result) => {
+        if(err) return res.send(err.sqlMessage)
+        return res.send(result)
+    })
+})
+
 // check user availability email & username
 // router.get('/check/:username/:email', (req,res) => {
 //     const username = req.params.username
