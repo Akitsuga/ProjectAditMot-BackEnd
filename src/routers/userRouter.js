@@ -17,70 +17,75 @@ const fs = require ('fs')
 // })
 
 //check username
-router.get('/users/:user', (req,res) => {
-    const username = req.params.user
-    const sql = `SELECT username FROM users WHERE username = '${username}'`
+// router.get('/users/:user', (req,res) => {
+//     const username = req.params.user
+//     const sql = `SELECT username FROM users WHERE username = '${username}'`
     
-    conn.query (sql, (err, result) => {
-        if (err) return res.send(err.sqlMessage)
-        console.log('Checking already run');
-        
-        res.send(result)
-    })
-})
-
-// check username availability
-router.get('/users/:username', (req,res) => {
-    const username = req.params 
-    const sql = `SELECT * FROM users WHERE username = '${username}'`
-
-    conn.query(sql, (err,result) => {
-        if(err) return res.send(err.sqlMessage)
-        return res.send(result)
-    })
-})
-
-// check email availability
-router.get('/users/:email', (req,res) => {
-    const email = req.params 
-    const sql = `SELECT * FROM users WHERE username = '${email}'`
-
-    conn.query(sql, (err,result) => {
-        if(err) return res.send(err.sqlMessage)
-        return res.send(result)
-    })
-})
-
-// check user availability email & username
-// router.get('/check/:username/:email', (req,res) => {
-//     const username = req.params.username
-//     const email = req.params.email
-//     const sql = `SELECT * FROM users WHERE username = '${username}'`
-//     const sql2 = `SELECT * FROM users WHERE email = '${email}`
-
 //     conn.query (sql, (err, result) => {
 //         if (err) return res.send(err.sqlMessage)
-//         console.log('Checking username');
+//         console.log('Checking already run');
         
 //         res.send(result)
 //     })
 // })
 
+// check username availability
+router.get('/users/username/:username', (req,res) => {
+    const username = req.params.username
+    const sql = `SELECT * FROM users WHERE username = '${username}'`
+    
+    conn.query(sql, (err,result) => {
+        if(err) return res.send(err.sqlMessage)
+        // console.log(`\ncheck username`)
+        return res.send(result)
+    })
+})
+
+// check email availability
+router.get('/users/email/:email', (req,res) => {
+    const email = req.params.email
+    const sql = `SELECT * FROM users WHERE username = '${email}'`
+
+    conn.query(sql, (err,result) => {
+        if(err) return res.send(err.sqlMessage)
+        // console.log(`\ncheck email`)
+        return res.send(result)
+    })
+})
+
+// check user availability email & username
+router.get('/check/:username/:email', (req,res) => {
+    const username = req.params.username
+    const email = req.params.email
+    const sql = `SELECT * FROM users WHERE username = '${username}' OR email = '${email}'`
+    // const sql2 = `SELECT * FROM users WHERE email = '${email}`
+
+    conn.query (sql, (err, result) => {
+        if (err) return res.send(err.sqlMessage)
+        console.log('Checking username');
+        console.log(result);
+        res.send(result)
+    })
+})
+
 // login
 router.get('/users/:user/:pass', (req,res) => {
-
-    const username = req.params.user
-    var password = req.params.pass
+    // console.log(req.query);
+    
+    const username = req.query.username
+    var password = req.query.password
     const sql = `SELECT * FROM users WHERE username = '${username}'`
     const sql2 = `SELECT * FROM users WHERE email = '${username}'`
+    // console.log(username);
+    // console.log(password);
     
-    if(!isEmail(req.body.username)) {
+    if(!isEmail(username)) {
     conn.query (sql, async (err, result) => {
         if (err) return res.send(err.sqlMessage)
-        console.log(sql); // jika username = username
+        // console.log(sql); // jika username = username
         
         const user = result[0]
-        console.log(user);
+        // console.log(user);
         
         if(!user) return res.send('User not available')
         
@@ -90,10 +95,11 @@ router.get('/users/:user/:pass', (req,res) => {
         if(!compare) return requestAnimationFrame.send('Wrong password')
         
         res.send(user)
+
     })} else {
     conn.query (sql2, async (err, result) => {
         if (err) return res.send(err.sqlMessage)
-        console.log(sql2); // jika username = emaila
+        // console.log(sql2); // jika username = emaila
 
         const user = result[0]
         if(!user) return res.send('User not available')
@@ -116,7 +122,7 @@ router.post('/reguser', async (req, res) => {
     if(!isEmail(req.body.email)) return res.send('Email not valid')
 
     req.body.password = await bcrypt.hash(req.body.password, 8)
-    // console.log('email verified & password hashed');
+    console.log('email verified & password hashed');
     console.log(req.body.password);
     
     conn.query (sql, data, (err, result) => {
